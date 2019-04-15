@@ -25,7 +25,7 @@
 /* Task pool include. */
 #include "iot_taskpool.h"
 
-/* Clock include. */
+/* Clock include. (for sleep) */
 #include "platform/iot_clock.h"
 
 #define _WAIT_METRICS_JOB_MAX_SECONDS    ( 5 )

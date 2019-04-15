@@ -53,6 +53,9 @@
 /* Defender includes. */
 #include "aws_iot_defender.h"
 
+/* Metrics includes. */
+#include "platform/iot_metrics.h"
+
 /* Set to 1 to enable this demo to connect to echo server.
  * Then in the demo output, it is expected to see one more established TCP connection.
  */
@@ -82,7 +85,7 @@ static void _startDefender();
 
 /*-----------------------------------------------------------*/
 
-void vStartDefenderDemo( void )
+void vStartDeviceDefenderDemo( void )
 {
     ( void ) xTaskCreate( _defenderTask,
                           "Defender Demo",
@@ -155,7 +158,8 @@ static void _defenderTask( void * param )
 
     /* Convert to string. */
     SOCKETS_inet_ntoa( expectedIp, expectedIpBuffer );
-    IotLogInfo( "expected ip: %s", expectedIpBuffer );
+    IotLogInfo( "Expected IP address of AWS IoT endpoint: %s", expectedIpBuffer );
+    IotLogInfo( "Expected port number of AWS IoT endpoint: %d", clientcredentialMQTT_BROKER_PORT );
 
     /* Let it run for 3 seconds */
     IotClock_SleepMs( 3000 );
@@ -170,7 +174,7 @@ static void _defenderTask( void * param )
     #endif
 
     IotLogInfo( "----Device Defender Demo End----.\r\n" );
-    
+
     vTaskDelete( NULL ); /* Delete this task. */
 }
 
