@@ -83,8 +83,14 @@ set(
     WICED_SDK_BT_CONFIG_DCT_H=\"./include/default_bt_config_dct.h\" 
 )
 
+target_compile_definitions(
+    AFR::compiler::mcu_port
+    INTERFACE $<$<NOT:$<COMPILE_LANGUAGE:ASM>>:${defined_symbols}>
+)
+
 # Kernel
 afr_mcu_port(kernel)
+set(toolchain_path "${AFR_TOOLCHAIN_PATH}/../lib/gcc/arm-none-eabi/7.2.1")
 
 set(
     kernel_inc_dirs
@@ -145,13 +151,15 @@ set(
     "${AFR_ROOT_DIR}/demos/common/include"
     "${AFR_ROOT_DIR}/lib/include"
     "${AFR_ROOT_DIR}/lib/include/private"
+    "${toolchain_path}/include"
+    "${toolchain_path}/include-fixed"
 )
 
 set(common_flags "-mthumb" "-mcpu=cortex-r4" "-mthumb-interwork" "-mlittle-endian")
-set(c_flags "-Wall" "-fsigned-char" "-ffunction-sections" "-fdata-sections" "-fno-common" "-std=gnu11" "-fdiagnostics-color" "-Werror" "-Os")
-set(toolchain_path "$WICED_STUDIO_SDK_PATH/43xxx_Wi-Fi/tools/ARM_GNU/OSX/lib/gcc/arm-none-eabi/7.2.1/")
-set(cypress_flags "-isystem" "${toolchain_path}/include" "-isystem" "${toolchain_path}/include-fixed")
-set(linker_flags "--static -Wl, -static -Wl, --warn-common")
+set(c_flags "-Wall" "-fsigned-char" "-ffunction-sections" "-fdata-sections" "-fno-common" "-std=gnu11" "-fdiagnostics-color" "-Os")
+#set(toolchain_path "$WICED_STUDIO_SDK_PATH/43xxx_Wi-Fi/tools/ARM_GNU/OSX/lib/gcc/arm-none-eabi/7.2.1/")
+#set(cypress_flags "-isystem" "${toolchain_path}/include" "-isystem" "${toolchain_path}/include-fixed")
+set(linker_flags "-Wl,-static" "-Wl,--warn-common")
 
 # Compiler flags
 target_compile_options(
@@ -164,7 +172,7 @@ target_compile_options(
 # Linker flags
 target_link_options(
     AFR::compiler::mcu_port
-    INTERFACE ${common_flags} ${linker_flags}
+    INTERFACE ${linker_flags}
 )
 
 # Global include directories
