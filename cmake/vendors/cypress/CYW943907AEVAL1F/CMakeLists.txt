@@ -150,6 +150,9 @@ set(
     "${AFR_ROOT_DIR}/lib/include/private"
 )
 
+set(common_flags "-mthumb" "-mcpu=cortex-r4" "-mthumb-interwork" "-mlittle-endian")
+set(c_flags "-Wall" "-fsigned-char" "-ffunction-sections" "-fdata-sections" "-fno-common" "-std=gnu11" "-fdiagnostics-color" "-Werror" "-Os" "-rcs")
+
 # Global include directories
 target_include_directories(
     AFR::compiler::mcu_port
@@ -157,28 +160,6 @@ target_include_directories(
         ${kernel_inc_dirs}
 )
 
-# Linker flags
-# target_link_options(
-#     AFR::compiler::mcu_port
-#     INTERFACE
-#         -mcpu=cortex-m4
-# )
-
-# Library search path for linker
-# target_link_directories(
-#     AFR::compiler::mcu_port
-#     INTERFACE
-#         "<lib_path_0>"
-#         "<lib_path_1>"
-# )
-
-# Libraries to link
-# target_link_libraries(
-#     AFR::compiler::mcu_port
-#     INTERFACE
-#         "foo.a"
-#         "/full/path/bar.a"
-# )
 
 # -------------------------------------------------------------------------------------------------
 # Amazon FreeRTOS portable layers
