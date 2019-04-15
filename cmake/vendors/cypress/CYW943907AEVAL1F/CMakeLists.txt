@@ -14,7 +14,7 @@ afr_set_board_metadata(ID "CYW943907AEVAL1F")
 afr_set_board_metadata(DISPLAY_NAME "Cypress CYW943907AEVAL1F Development Kit")
 afr_set_board_metadata(DESCRIPTION "The Cypress CYW943907AEVAL1F Evaluation Kit")
 afr_set_board_metadata(VENDOR_NAME "Cypress")
-afr_set_board_metadata(FAMILY_NAME "CYW43907")
+afr_set_board_metadata(FAMILY_NAME "ARM")
 afr_set_board_metadata(IS_ACTIVE "TRUE")
 afr_set_board_metadata(DATA_RAM_MEMORY "640KB")
 afr_set_board_metadata(PROGRAM_MEMORY "2MB")
@@ -39,13 +39,6 @@ target_compile_definitions(
      AFR::compiler::mcu_port
      INTERFACE AmazonFreeRTOS
 )
-
-# Compiler flags
-# target_compile_options(
-#     AFR::compiler::mcu_port
-#     INTERFACE
-#         -std=c11
-# )
 set(
     defined_symbols
     SFLASH_APPS_HEADER_LOC=0x00010000 
@@ -90,8 +83,13 @@ set(
     WICED_SDK_BT_CONFIG_DCT_H=\"./include/default_bt_config_dct.h\" 
 )
 
+# Kernel
+afr_mcu_port(kernel)
+
 set(
     kernel_inc_dirs
+    "${AFR_MODULES_DIR}/FreeRTOS/portable/ThirdParty/GCC/Wiced_CY"
+    "${wicedsdk_dir}/include"
     "${wicedsdk_dir}/WICED/platform/MCU/BCM4390x/peripherals/spi_flash"
     "${wicedsdk_dir}/libraries/utilities/ring_buffer" 
     "${wicedsdk_dir}/WICED/platform/GCC/" 
@@ -105,11 +103,10 @@ set(
     "${wicedsdk_dir}/WICED/platform/MCU/BCM4390x/peripherals"
     "${wicedsdk_dir}/WICED/platform/MCU/BCM4390x/peripherals/include"
     "${wicedsdk_dir}/WICED/platform/MCU/BCM4390x/peripherals/tlsf"
-    "${wicedsdk_dir}/WICED/platform/MCU/BCM4390x/./Library/drivers/spi_flash" 
-    "${wicedsdk_dir}/WICED/platform/MCU/BCM4390x/./platforms/CYW943907AEVAL1F"
-    "${wicedsdk_dir}/WICED/platform/MCU/BCM4390x/./platforms/CYW943907AEVAL1F/" 
+    "${wicedsdk_dir}/WICED/platform/MCU/BCM4390x/peripherals/spi_flash" 
+    "${wicedsdk_dir}/platforms/CYW943907AEVAL1F"
     "${wicedsdk_dir}/WICED/platform/include"
-    "${wicedsdk_dir}/WICED/platform/MCU/BCM4390x/./libraries/bluetooth/include"
+    #"${wicedsdk_dir}/WICED/platform/MCU/BCM4390x/./libraries/bluetooth/include"
     "${wicedsdk_dir}/libraries/filesystems/wicedfs/src"
     "${wicedsdk_dir}/WICED/WWD/"
     "${wicedsdk_dir}/WICED/WWD/include" 
@@ -119,21 +116,21 @@ set(
     "${wicedsdk_dir}/WICED/WWD/internal/chips/4390x" 
     "${wicedsdk_dir}/libraries/utilities/linked_list" 
     "${wicedsdk_dir}/WICED/RTOS/FreeRTOS/WICED" 
-    "${wicedsdk_dir}/WICED/network/LwIP/WICED/."
+    #"${wicedsdk_dir}/WICED/network/LwIP/WICED/."
     "${wicedsdk_dir}/WICED/network/LwIP/WWD/." 
     "${wicedsdk_dir}/WICED/RTOS/FreeRTOS/WICED/."
     "${wicedsdk_dir}/WICED/RTOS/FreeRTOS/WWD/."
-    "${wicedsdk_dir}/WICED/RTOS/FreeRTOS/WWD/./CYW943907AEVAL1F"
-    "${wicedsdk_dir}/WICED/RTOS/FreeRTOS/WWD/./ARM_CR4"
+    #"${wicedsdk_dir}/WICED/RTOS/FreeRTOS/WWD/./CYW943907AEVAL1F"
+    "${wicedsdk_dir}/WICED/RTOS/FreeRTOS/WWD/ARM_CR4"
     "${wicedsdk_dir}/libraries/utilities/wifi/."
     "${wicedsdk_dir}/WICED/."
     "${wicedsdk_dir}/WICED/platform/include"
     "${wicedsdk_dir}/WICED/platform/include"
-    "${wicedsdk_dir}/WICED/libraries/test/wl_tool/43909B0/include"
+    #"${wicedsdk_dir}/WICED/libraries/test/wl_tool/43909B0/include"
     "${wicedsdk_dir}/libraries/utilities/wifi"
     "${wicedsdk_dir}/WICED/network/LwIP/WICED"
     "${wicedsdk_dir}/platforms/CYW943907AEVAL1F/."
-    "${wicedsdk_dir}/platforms/CYW943907AEVAL1F/./board_revision/P103"
+    "${wicedsdk_dir}/platforms/CYW943907AEVAL1F/board_revision/P103"
     "${AFR_3RDPARTY_DIR}/jsmn"
     "${AFR_3RDPARTY_DIR}/pkcs11"
     "${AFR_3RDPARTY_DIR}/lwip/src/include"
@@ -141,7 +138,7 @@ set(
     "${AFR_3RDPARTY_DIR}/lwip/src/portable"
     "${AFR_3RDPARTY_DIR}/lwip/src/portable/cypress/CYW943907AEVAL1F"
     "${AFR_3RDPARTY_DIR}/lwip/src/portable/cypress/CYW943907AEVAL1F/include"
-    "${AFR_3RDPARTY_DIR}/lwip/src/portable/cypress/arch"
+    "${AFR_3RDPARTY_DIR}/lwip/src/portable/arch"
     "${AFR_3RDPARTY_DIR}/mbedtls/include"
     "${board_dir}/application_code/cypress_code/include"
     "${board_dir}/config_files"
@@ -151,16 +148,30 @@ set(
 )
 
 set(common_flags "-mthumb" "-mcpu=cortex-r4" "-mthumb-interwork" "-mlittle-endian")
-set(c_flags "-Wall" "-fsigned-char" "-ffunction-sections" "-fdata-sections" "-fno-common" "-std=gnu11" "-fdiagnostics-color" "-Werror" "-Os" "-rcs")
+set(c_flags "-Wall" "-fsigned-char" "-ffunction-sections" "-fdata-sections" "-fno-common" "-std=gnu11" "-fdiagnostics-color" "-Werror" "-Os")
 set(toolchain_path "$WICED_STUDIO_SDK_PATH/43xxx_Wi-Fi/tools/ARM_GNU/OSX/lib/gcc/arm-none-eabi/7.2.1/")
 set(cypress_flags "-isystem" "${toolchain_path}/include" "-isystem" "${toolchain_path}/include-fixed")
 set(linker_flags "--static -Wl, -static -Wl, --warn-common")
+
+# Compiler flags
+target_compile_options(
+    AFR::compiler::mcu_port
+    INTERFACE
+        ${common_flags}
+        $<$<NOT:$<COMPILE_LANGUAGE:ASM>>:${c_flags}>
+)
+
+# Linker flags
+target_link_options(
+    AFR::compiler::mcu_port
+    INTERFACE ${common_flags} ${linker_flags}
+)
 
 # Global include directories
 target_include_directories(
     AFR::compiler::mcu_port
     INTERFACE
-        ${kernel_inc_dirs}
+        $<$<NOT:$<COMPILE_LANGUAGE:ASM>>:${kernel_inc_dirs}>
 )
 
 
@@ -215,30 +226,24 @@ else()
     set(exe_target aws_demos)
 endif()
 
-afr_glob_src(board_code_src DIRECTORY "${board_dir}/application_code/st_code")
+afr_glob_src(board_code_src DIRECTORY "${board_dir}/application_code/cypress_code")
 add_executable(
     ${exe_target}
     ${board_code_src}
     "${board_dir}/application_code/main.c"
+    "${AFR_MODULES_DIR}/pkcs11/${portable_dir}/hw_poll.c"
 )
+
 target_link_libraries(
     ${exe_target}
     PRIVATE
+        AFR::kernel
         AFR::wifi
         AFR::utils
-        -T"${board_dir}/../ac6/STM32L475VGTx_FLASH.ld"
 )
 
-if(AFR_NON_BUILD_MODE)
-    return()
-endif()
-
-# -------------------------------------------------------------------------------------------------
-# Additional build configurations
-# -------------------------------------------------------------------------------------------------
-
 find_program(gcc_objcopy arm-none-eabi-objcopy)
-find_program(gcc_size arm-none-eabi-size)
+
 if(NOT gcc_objcopy)
     message(FATAL_ERROR "Cannot find arm-none-eabi-objcopy.")
 endif()
@@ -246,10 +251,5 @@ endif()
 set(output_file "$<TARGET_FILE_DIR:${exe_target}>/${exe_target}.hex")
 add_custom_command(
     TARGET ${exe_target} POST_BUILD
-    COMMAND "${gcc_objcopy}" -O ihex "$<TARGET_FILE:${exe_target}>" "${output_file}"
-    COMMAND "${gcc_size}" "$<TARGET_FILE:${exe_target}>"
-)
-add_custom_command(
-    TARGET ${exe_target} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy "${output_file}" "${CMAKE_BINARY_DIR}"
+    COMMAND "${gcc_objcopy}" -v -O ihex "$<TARGET_FILE:${exe_target}>" "${output_file}"
 )
