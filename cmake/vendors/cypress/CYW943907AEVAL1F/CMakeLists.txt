@@ -152,6 +152,8 @@ set(
 
 set(common_flags "-mthumb" "-mcpu=cortex-r4" "-mthumb-interwork" "-mlittle-endian")
 set(c_flags "-Wall" "-fsigned-char" "-ffunction-sections" "-fdata-sections" "-fno-common" "-std=gnu11" "-fdiagnostics-color" "-Werror" "-Os" "-rcs")
+set(toolchain_path "$WICED_STUDIO_SDK_PATH/43xxx_Wi-Fi/tools/ARM_GNU/OSX/lib/gcc/arm-none-eabi/7.2.1/")
+set(cypress_flags "-isystem" "${toolchain_path}/include" "-isystem" "${toolchain_path}/include-fixed")
 
 # Global include directories
 target_include_directories(
