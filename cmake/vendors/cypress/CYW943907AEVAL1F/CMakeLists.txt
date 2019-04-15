@@ -155,6 +155,19 @@ set(
     "${toolchain_path}/include-fixed"
 )
 
+target_sources(
+    AFR::kernel::mcu_port
+    INTERFACE
+    "${AFR_ROOT_DIR}/lib/FreeRTOS/event_groups.c"
+    "${AFR_ROOT_DIR}/lib/FreeRTOS/list.c"
+    "${AFR_ROOT_DIR}/lib/FreeRTOS/queue.c"
+    "${AFR_ROOT_DIR}/lib/FreeRTOS/tasks.c"
+    "${AFR_ROOT_DIR}/lib/FreeRTOS/timers.c"
+    "${AFR_ROOT_DIR}/lib/FreeRTOS/stream_buffer.c"
+    "${AFR_ROOT_DIR}/lib/FreeRTOS/portable/MemMang/heap_3.c"
+    "${AFR_ROOT_DIR}/lib/FreeRTOS/portable/ThirdParty/GCC/Wiced_CY/port.c"
+)
+
 set(common_flags "-mthumb" "-mcpu=cortex-r4" "-mthumb-interwork" "-mlittle-endian")
 set(c_flags "-Wall" "-fsigned-char" "-ffunction-sections" "-fdata-sections" "-fno-common" "-std=gnu11" "-fdiagnostics-color" "-Os")
 #set(toolchain_path "$WICED_STUDIO_SDK_PATH/43xxx_Wi-Fi/tools/ARM_GNU/OSX/lib/gcc/arm-none-eabi/7.2.1/")
