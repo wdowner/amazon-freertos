@@ -155,6 +155,14 @@ set(
     "${toolchain_path}/include-fixed"
 )
 
+afr_glob_src(wiced_src DIRECTORY "${wicedsdk_dir}/WICED/platform/MCU/" RECURSE)
+
+target_include_directories(
+    AFR::kernel::mcu_port
+    INTERFACE
+        ${kernel_inc_dirs}
+)
+
 target_sources(
     AFR::kernel::mcu_port
     INTERFACE
@@ -188,12 +196,7 @@ target_link_options(
     INTERFACE ${linker_flags}
 )
 
-# Global include directories
-target_include_directories(
-    AFR::compiler::mcu_port
-    INTERFACE
-        $<$<NOT:$<COMPILE_LANGUAGE:ASM>>:${kernel_inc_dirs}>
-)
+
 
 
 # -------------------------------------------------------------------------------------------------
