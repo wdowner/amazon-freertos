@@ -80,7 +80,8 @@ set(
     USING_EXTERNAL_ADC 
     WICED_AMAZON_FREERTOS_SDK 
     WICED_SDK_WIFI_CONFIG_DCT_H=\"./include/default_wifi_config_dct.h\"
-    WICED_SDK_BT_CONFIG_DCT_H=\"./include/default_bt_config_dct.h\" 
+    WICED_SDK_BT_CONFIG_DCT_H=\"./include/default_bt_config_dct.h\"
+    __JTAG_FLASH_WRITER_DATA_BUFFER_SIZE__=32768
 )
 
 target_compile_definitions(
@@ -155,7 +156,8 @@ set(
     "${toolchain_path}/include-fixed"
 )
 
-afr_glob_src(wiced_src DIRECTORY "${wicedsdk_dir}/WICED/platform/MCU/" RECURSE)
+afr_glob_src(wiced_mcu_src DIRECTORY "${wicedsdk_dir}/WICED/platform/MCU/")
+afr_glob_src(apps_src DIRECTORY "${wicedsdk_dir}/apps" RECURSE)
 
 target_include_directories(
     AFR::kernel::mcu_port
@@ -174,6 +176,8 @@ target_sources(
     "${AFR_ROOT_DIR}/lib/FreeRTOS/stream_buffer.c"
     "${AFR_ROOT_DIR}/lib/FreeRTOS/portable/MemMang/heap_3.c"
     "${AFR_ROOT_DIR}/lib/FreeRTOS/portable/ThirdParty/GCC/Wiced_CY/port.c"
+    "${apps_src}"
+    #"${wiced_mcu_src}"
 )
 
 set(common_flags "-mthumb" "-mcpu=cortex-r4" "-mthumb-interwork" "-mlittle-endian")
