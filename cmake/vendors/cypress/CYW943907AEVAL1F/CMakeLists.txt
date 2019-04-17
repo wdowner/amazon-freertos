@@ -102,6 +102,7 @@ target_compile_definitions(
 afr_mcu_port(kernel)
 set(toolchain_path "${AFR_TOOLCHAIN_PATH}/../lib/gcc/arm-none-eabi/7.2.1")
 set(include_path "${AFR_TOOLCHAIN_PATH}/../arm-none-eabi/include")
+set(adc_drivers_path "${AFR_TOOLCHAIN_PATH}/../../../../libraries/drivers/adc/MAX11615")
 
 set(
     kernel_inc_dirs
@@ -124,7 +125,6 @@ set(
     "${wicedsdk_dir}/platforms/CYW943907AEVAL1F"
     "${wicedsdk_dir}/WICED/platform/include"
     #"${wicedsdk_dir}/WICED/platform/MCU/BCM4390x/./libraries/bluetooth/include"
-    "${wicedsdk_dir}/libraries/filesystems/wicedfs/src"
     "${wicedsdk_dir}/WICED/WWD/"
     "${wicedsdk_dir}/WICED/WWD/include" 
     "${wicedsdk_dir}/WICED/WWD/include/network" 
@@ -142,7 +142,7 @@ set(
     "${wicedsdk_dir}/libraries/utilities/wifi/."
     "${wicedsdk_dir}/WICED/."
     "${wicedsdk_dir}/WICED/platform/include"
-    "${wicedsdk_dir}/WICED/platform/include"
+    "${wicedsdk_dir}/libraries/filesystems/wicedfs/src"
     #"${wicedsdk_dir}/WICED/libraries/test/wl_tool/43909B0/include"
     "${wicedsdk_dir}/libraries/utilities/wifi"
     "${wicedsdk_dir}/WICED/network/LwIP/WICED"
@@ -165,6 +165,7 @@ set(
     "${toolchain_path}/include"
     "${toolchain_path}/include-fixed"
     "${include_path}"
+    "${adc_drivers_path}"
 )
 
 
@@ -183,11 +184,7 @@ afr_glob_src(lwip_arch_src DIRECTORY "${AFR_3RDPARTY_DIR}/lwip/src/portable/arch
 afr_glob_src(lwip_portable_src DIRECTORY "${AFR_3RDPARTY_DIR}/lwip/src/portable/cypress/CYW943907AEVAL1F" RECURSE)
 afr_glob_src(wwd_bus_protocol_chips_src DIRECTORY "${wicedsdk_dir}/WICED/internal")
 afr_glob_src(wwd_internal_src DIRECTORY "${wicedsdk_dir}/WICED/WWD/internal" RECURSE)
-#afr_glob_src(wwd_bus_protocol_src DIRECTORY "${wicedsdk_dir}/WICED/WWD/internal/bus_protocols")
-#afr_glob_src(wwd_bus_protocol_SOC_src DIRECTORY "${wicedsdk_dir}/WICED/WWD/internal/bus_protocols/SoC/43909")
-#afr_glob_src(wwd_bus_protocol_chips_src DIRECTORY "${wicedsdk_dir}/WICED/WWD/internal/chips/4390x")
 afr_glob_src(wwd_FreeRTOS DIRECTORY "${wicedsdk_dir}/WICED/RTOS/FreeRTOS/WWD" RECURSE)
-#afr_glob_src(wiced_fs DIRECTORY "${wicedsdk_dir}/libraries/filesystems/wicedfs")
 afr_glob_src( shared_src DIRECTORY "${wicedsdk_dir}/WICED/platform/MCU/BCM4390x/peripherals/shared")
 
 set(platform_src
@@ -237,6 +234,7 @@ set( peripheral_src
     "${wicedsdk_dir}/WICED/platform/MCU/BCM4390x/peripherals/platform_spi_flash.c"
     "${wicedsdk_dir}/WICED/platform/MCU/BCM4390x/peripherals/platform_ascu.c"
     "${wicedsdk_dir}/WICED/platform/MCU/BCM4390x/peripherals/platform_pwm.c"
+    "${wicedsdk_dir}/WICED/platform/MCU/BCM4390x/peripherals/platform_adc.c"
 )
 
 target_include_directories(
@@ -308,6 +306,7 @@ target_sources(
     "${wicedsdk_dir}/WICED/internal/wiced_lib.c"
     "${wicedsdk_dir}/WICED/platform/MCU/wwd_resources.c"
     "${wicedsdk_dir}/libraries/utilities/wifi/wifi_utils.c"
+    "${adc_drivers_path}/MAX11615.c"
     "${apps_src}"
 )
 
@@ -397,6 +396,7 @@ target_link_libraries(
         AFR::kernel
         AFR::wifi
         AFR::utils
+        "${AFR_ROOT_DIR}/libm.a"
 )
 
 find_program(gcc_objcopy arm-none-eabi-objcopy)
