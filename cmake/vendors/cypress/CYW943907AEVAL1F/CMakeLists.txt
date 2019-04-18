@@ -309,8 +309,9 @@ target_sources(
     "${adc_drivers_path}/MAX11615.c"
     "${apps_src}"
 )
+enable_language(C ASM)
 
-set(common_flags "-mthumb" "-mcpu=cortex-r4" "-mthumb-interwork" "-mlittle-endian" "--defsym" "SYS_STACK_SIZE=0" "--defsym" "FIQ_STACK_SIZE=0" "--defsym" "IRQ_STACK_SIZE=1024")
+set(common_flags "-mthumb" "-mcpu=cortex-r4" "-mthumb-interwork" "-mlittle-endian")
 set(c_flags "-Wall" "-Waddress" "-Wundef" "-fsigned-char" "-ffunction-sections" "-fdata-sections" "-fno-common" "-std=gnu11" "-fdiagnostics-color" "-Os" )
 
 set(linker_flags "-Wl,-static" "-Wl,--warn-common" "-Wl,--gc-sections" "-Wl,-Os" "-Wl,--cref" "-mthumb" "-mcpu=cortex-r4" "-mthumb-interwork" "-Wl,-A,thumb" "-Wl,-z,max-page-size=0x10" "-Wl,-z,common-page-size=0x10" "-mlittle-endian" "-nostartfiles" "-Wl,--defsym,START_STACK_SIZE=4000" "-Wl,--defsym,FIQ_STACK_SIZE=0" "-Wl,--defsym,IRQ_STACK_SIZE=1024" "-Wl,--defsym,SYS_STACK_SIZE=0") 
