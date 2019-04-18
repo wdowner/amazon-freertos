@@ -270,6 +270,7 @@ target_sources(
     "${lwip_netif_src}"
     "${lwip_arch_src}"
     "${lwip_portable_src}"
+    "${peripheral_src}"
     "${wicedsdk_dir}/WICED/RTOS/wiced_rtos_common.c"
     "${wicedsdk_dir}/WICED/RTOS/FreeRTOS/WICED/wiced_rtos.c"
     "${wicedsdk_dir}/WICED/network/wiced_network_common.c"
@@ -291,7 +292,6 @@ target_sources(
     "${wicedsdk_dir}/libraries/utilities/ring_buffer/ring_buffer.c"
     "${wicedsdk_dir}/WICED/platform/GCC/cxx_funcs.c"
     "${wicedsdk_dir}/platforms/CYW943907AEVAL1F/platform.c"
-    "${peripheral_src}"
     "${wicedsdk_dir}/WICED/platform/MCU/BCM4390x/peripherals/spi_flash/spi_flash.c"
     "${wicedsdk_dir}/WICED/platform/MCU/BCM4390x/peripherals/spi_flash/spi_flash_compatible.c"
     "${wicedsdk_dir}/WICED/platform/MCU/BCM4390x/peripherals/uart/platform_uart.c"
@@ -310,9 +310,10 @@ target_sources(
     "${apps_src}"
 )
 
-set(common_flags "-mthumb" "-mcpu=cortex-r4" "-mthumb-interwork" "-mlittle-endian")
+set(common_flags "-mthumb" "-mcpu=cortex-r4" "-mthumb-interwork" "-mlittle-endian" "--defsym" "SYS_STACK_SIZE=0" "--defsym" "FIQ_STACK_SIZE=0" "--defsym" "IRQ_STACK_SIZE=1024")
 set(c_flags "-Wall" "-Waddress" "-Wundef" "-fsigned-char" "-ffunction-sections" "-fdata-sections" "-fno-common" "-std=gnu11" "-fdiagnostics-color" "-Os" )
-set(linker_flags "-Wl,-static" "-Wl,--warn-common")
+
+set(linker_flags "-Wl,-static" "-Wl,--warn-common" "-Wl,--gc-sections" "-Wl,-Os" "-Wl,--cref" "-mthumb" "-mcpu=cortex-r4" "-mthumb-interwork" "-Wl,-A,thumb" "-Wl,-z,max-page-size=0x10" "-Wl,-z,common-page-size=0x10" "-mlittle-endian" "-nostartfiles" "-Wl,--defsym,START_STACK_SIZE=4000" "-Wl,--defsym,FIQ_STACK_SIZE=0" "-Wl,--defsym,IRQ_STACK_SIZE=1024" "-Wl,--defsym,SYS_STACK_SIZE=0") 
 
 # Compiler flags
 target_compile_options(
@@ -327,8 +328,6 @@ target_link_options(
     AFR::compiler::mcu_port
     INTERFACE ${linker_flags}
 )
-
-
 
 
 # -------------------------------------------------------------------------------------------------
@@ -396,7 +395,14 @@ target_link_libraries(
         AFR::kernel
         AFR::wifi
         AFR::utils
+        "${AFR_ROOT_DIR}/libgcc.a"
         "${AFR_ROOT_DIR}/libm.a"
+        "${AFR_ROOT_DIR}/libc.a"
+        "${AFR_ROOT_DIR}/libstdc++.a"
+        #"${wicedsdk_dir}/WICED/platform/MCU/BCM4390x/BCM43907/GCC_tiny_bootloader.ld" 
+        #-L "${wicedsdk_dir}/WICED/platform/MCU/BCM4390x"
+        -Wl,-T"${wicedsdk_dir}/WICED/platform/MCU/BCM4390x/GCC/tiny_bootloader.ld"
+        -Wl,-T"${wicedsdk_dir}/WICED/platform/MCU/BCM4390x/GCC/dct.ld"
 )
 
 find_program(gcc_objcopy arm-none-eabi-objcopy)
