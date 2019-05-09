@@ -168,7 +168,7 @@ CK_RV xInitializePkcs11Session( CK_SESSION_HANDLE * pxSession )
     {
         xResult = pxFunctionList->C_Login( *pxSession,
                                            CKU_USER,
-                                           configPKCS11_DEFAULT_USER_PIN,
+                                           ( CK_UTF8CHAR_PTR )configPKCS11_DEFAULT_USER_PIN,
                                            sizeof( configPKCS11_DEFAULT_USER_PIN ) - 1 );
     }
 

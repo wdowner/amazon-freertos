@@ -778,7 +778,6 @@ TEST( Full_PKCS11_NoObject, AFQP_Digest_ErrorConditions )
 TEST( Full_PKCS11_NoObject, AFQP_GenerateRandom )
 {
     CK_RV xResult = 0;
-    CK_SLOT_ID xSlotId = 0;
     BaseType_t xSameSession = 0;
     BaseType_t xDifferentSessions = 0;
     int i;
@@ -889,13 +888,12 @@ static void prvGenerateRandomMultiThreadTask( void * pvParameters )
 
 TEST( Full_PKCS11_NoObject, AFQP_GenerateRandomMultiThread )
 {
-    CK_RV xResult;
     BaseType_t xTaskNumber;
     CK_SESSION_HANDLE xSessionHandle[ pkcs11testMULTI_THREAD_TASK_COUNT ];
 
     for( xTaskNumber = 0; xTaskNumber < pkcs11testMULTI_THREAD_TASK_COUNT; xTaskNumber++ )
     {
-        xResult = xInitializePkcs11Session( &xSessionHandle[ xTaskNumber ] );
+        xInitializePkcs11Session( &xSessionHandle[ xTaskNumber ] );
         xGlobalTaskParams[ xTaskNumber ].pvTaskData = &xSessionHandle[ xTaskNumber ];
     }
 
@@ -903,7 +901,7 @@ TEST( Full_PKCS11_NoObject, AFQP_GenerateRandomMultiThread )
 
     for( xTaskNumber = 0; xTaskNumber < pkcs11testMULTI_THREAD_TASK_COUNT; xTaskNumber++ )
     {
-        xResult = pxGlobalFunctionList->C_CloseSession( xSessionHandle[ xTaskNumber ] );
+        pxGlobalFunctionList->C_CloseSession( xSessionHandle[ xTaskNumber ] );
     }
 }
 
@@ -979,32 +977,36 @@ void prvProvisionRsaTestCredentials( CK_OBJECT_HANDLE_PTR pxPrivateKeyHandle,
                                         ( uint8_t * ) cValidRSAPrivateKey,
                                         sizeof( cValidRSAPrivateKey ),
                                         CKK_RSA,
-                                        pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS,
+                                        ( uint8_t * ) pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS,
                                         pxPrivateKeyHandle );
 
         TEST_ASSERT_EQUAL_MESSAGE( CKR_OK, xResult, "Failed to create RSA private key." );
         TEST_ASSERT_NOT_EQUAL_MESSAGE( 0, *pxPrivateKeyHandle, "Invalid object handle returned for RSA private key." );
+        TEST_ASSERT_NOT_EQUAL_MESSAGE( CK_INVALID_HANDLE, *pxPrivateKeyHandle, "Invalid object handle returned for RSA private key." );
 
         /* Create a certificate. */
         xResult = xProvisionCertificate( xGlobalSession,
                                          ( uint8_t * ) cValidRSACertificate,
                                          sizeof( cValidRSACertificate ),
-                                         pkcs11configLABEL_DEVICE_CERTIFICATE_FOR_TLS,
+                                         ( uint8_t * ) pkcs11configLABEL_DEVICE_CERTIFICATE_FOR_TLS,
                                          pxCertificateHandle );
 
         TEST_ASSERT_EQUAL_MESSAGE( CKR_OK, xResult, "Failed to create RSA certificate." );
         TEST_ASSERT_NOT_EQUAL_MESSAGE( 0, *pxCertificateHandle, "Invalid object handle returned for RSA certificate." );
+        TEST_ASSERT_NOT_EQUAL_MESSAGE( CK_INVALID_HANDLE, *pxCertificateHandle, "Invalid object handle returned for RSA certificate." );
         xCurrentCredentials = eRsaTest;
     }
     else
     {
         xResult = xFindObjectWithLabelAndClass( xGlobalSession, pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS, CKO_PRIVATE_KEY, pxPrivateKeyHandle );
         TEST_ASSERT_EQUAL_MESSAGE( CKR_OK, xResult, "Failed to find RSA private key." );
-        TEST_ASSERT_NOT_EQUAL_MESSAGE( 0, pxPrivateKeyHandle, "Invalid object handle found for RSA private key." );
+        TEST_ASSERT_NOT_EQUAL_MESSAGE( 0, *pxPrivateKeyHandle, "Invalid object handle found for RSA private key." );
+        TEST_ASSERT_NOT_EQUAL_MESSAGE( CK_INVALID_HANDLE, *pxPrivateKeyHandle, "Invalid object handle found for RSA private key." );
 
         xResult = xFindObjectWithLabelAndClass( xGlobalSession, pkcs11configLABEL_DEVICE_CERTIFICATE_FOR_TLS, CKO_CERTIFICATE, pxCertificateHandle );
         TEST_ASSERT_EQUAL_MESSAGE( CKR_OK, xResult, "Failed to find RSA certificate." );
-        TEST_ASSERT_NOT_EQUAL_MESSAGE( 0, pxCertificateHandle, "Invalid object handle found for RSA certificate." );
+        TEST_ASSERT_NOT_EQUAL_MESSAGE( 0, *pxCertificateHandle, "Invalid object handle found for RSA certificate." );
+        TEST_ASSERT_NOT_EQUAL_MESSAGE( CK_INVALID_HANDLE, *pxCertificateHandle, "Invalid object handle found for RSA certificate." );
     }
 }
 
@@ -1090,8 +1092,6 @@ TEST( Full_PKCS11_RSA, AFQP_CreateObjectGetAttributeValue )
     CK_OBJECT_HANDLE xPrivateKeyHandle;
     CK_OBJECT_HANDLE xCertificateHandle;
     CK_ATTRIBUTE xTemplate;
-    CK_BYTE xModulus[ MODULUS_LENGTH ];
-    CK_BYTE xPubExponent[ PUB_EXP_LENGTH ];
     CK_BYTE xCertificateValue[ CERTIFICATE_VALUE_LENGTH ];
 
     prvProvisionRsaTestCredentials( &xPrivateKeyHandle, &xCertificateHandle );
@@ -1122,15 +1122,10 @@ TEST( Full_PKCS11_RSA, AFQP_Sign )
     CK_BYTE xHashedMessage[ SHA256_DIGEST_SIZE ] = { 0 };
     CK_BYTE xSignature[ RSA_SIGNATURE_SIZE ] = { 0 };
     CK_ULONG xSignatureLength;
-    CK_BYTE xModulus[ RSA_SIGNATURE_SIZE ] = { 0 };
-    unsigned int ulModulusLength = 0;
-    CK_BYTE xExponent[ 4 ] = { 0 };
     CK_BYTE xHashPlusOid[ pkcs11RSA_SIGNATURE_INPUT_LENGTH ];
-    unsigned int ulExponentLength = 0;
 
     prvProvisionRsaTestCredentials( &xPrivateKeyHandle, &xCertificateHandle );
 
-    CK_ATTRIBUTE xTemplate;
     vAppendSHA256AlgorithmIdentifierSequence( xHashedMessage, xHashPlusOid );
 
     /* The RSA X.509 mechanism assumes a pre-hashed input. */
@@ -1153,7 +1148,7 @@ TEST( Full_PKCS11_RSA, AFQP_Sign )
     if( TEST_PROTECT() )
     {
         lMbedTLSResult = mbedtls_pk_parse_key( ( mbedtls_pk_context * ) &xMbedPkContext,
-                                               cValidRSAPrivateKey,
+                                               ( const unsigned char * ) cValidRSAPrivateKey,
                                                sizeof( cValidRSAPrivateKey ),
                                                NULL,
                                                0 );
@@ -1186,8 +1181,8 @@ TEST( Full_PKCS11_RSA, AFQP_GenerateKeyPair )
     TEST_ASSERT_EQUAL_MESSAGE( CKR_OK, xResult, "Failed to destroy credentials before RSA generate key pair test." );
 
     xResult = xProvisionGenerateKeyPairRSA( xGlobalSession,
-                                            pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS,
-                                            pkcs11configLABEL_DEVICE_PUBLIC_KEY_FOR_TLS,
+                                            ( uint8_t * ) pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS,
+                                            ( uint8_t * ) pkcs11configLABEL_DEVICE_PUBLIC_KEY_FOR_TLS,
                                             &xPrivateKeyHandle,
                                             &xPublicKeyHandle );
     TEST_ASSERT_EQUAL( CKR_OK, xResult );
@@ -1287,7 +1282,7 @@ void prvProvisionEcTestCredentials( CK_OBJECT_HANDLE_PTR pxPrivateKeyHandle,
                                        ( uint8_t * ) cValidECDSAPrivateKey,
                                        sizeof( cValidECDSAPrivateKey ),
                                        CKK_EC,
-                                       pkcs11configLABEL_DEVICE_PUBLIC_KEY_FOR_TLS,
+                                       ( uint8_t * ) pkcs11configLABEL_DEVICE_PUBLIC_KEY_FOR_TLS,
                                        pxPublicKeyHandle );
         TEST_ASSERT_EQUAL_MESSAGE( CKR_OK, xResult, "Failed to create EC public key." );
         TEST_ASSERT_NOT_EQUAL_MESSAGE( 0, *pxPrivateKeyHandle, "Invalid object handle returned for EC public key." );
@@ -1296,7 +1291,7 @@ void prvProvisionEcTestCredentials( CK_OBJECT_HANDLE_PTR pxPrivateKeyHandle,
                                         ( uint8_t * ) cValidECDSAPrivateKey,
                                         sizeof( cValidECDSAPrivateKey ),
                                         CKK_EC,
-                                        pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS,
+                                        ( uint8_t * ) pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS,
                                         pxPrivateKeyHandle );
         TEST_ASSERT_EQUAL_MESSAGE( CKR_OK, xResult, "Failed to create EC private key." );
         TEST_ASSERT_NOT_EQUAL_MESSAGE( 0, *pxPrivateKeyHandle, "Invalid object handle returned for EC private key." );
@@ -1304,7 +1299,7 @@ void prvProvisionEcTestCredentials( CK_OBJECT_HANDLE_PTR pxPrivateKeyHandle,
         xResult = xProvisionCertificate( xGlobalSession,
                                          ( uint8_t * ) cValidECDSACertificate,
                                          sizeof( cValidECDSACertificate ),
-                                         pkcs11configLABEL_DEVICE_CERTIFICATE_FOR_TLS,
+                                         ( uint8_t * ) pkcs11configLABEL_DEVICE_CERTIFICATE_FOR_TLS,
                                          pxCertificateHandle );
         TEST_ASSERT_EQUAL_MESSAGE( CKR_OK, xResult, "Failed to create EC certificate." );
         TEST_ASSERT_NOT_EQUAL_MESSAGE( 0, *pxPrivateKeyHandle, "Invalid object handle returned for EC certificate." );
@@ -1333,10 +1328,6 @@ TEST( Full_PKCS11_EC, AFQP_CreateObjectDestroyObject )
     CK_OBJECT_HANDLE xPrivateKeyHandle;
     CK_OBJECT_HANDLE xPublicKeyHandle;
     CK_OBJECT_HANDLE xClientCertificateHandle;
-    CK_OBJECT_HANDLE xRootCertificateHandle;
-    CK_OBJECT_HANDLE xCodeSignPublicKeyHandle;
-    CK_OBJECT_HANDLE xJITPCertificateHandle;
-
 
     xResult = xDestroyCredentials( xGlobalSession );
     xCurrentCredentials = eNone;
@@ -1346,7 +1337,7 @@ TEST( Full_PKCS11_EC, AFQP_CreateObjectDestroyObject )
                                     ( uint8_t * ) cValidECDSAPrivateKey,
                                     sizeof( cValidECDSAPrivateKey ),
                                     CKK_EC,
-                                    pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS,
+                                    ( uint8_t * ) pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS,
                                     &xPrivateKeyHandle );
     TEST_ASSERT_EQUAL_MESSAGE( CKR_OK, xResult, "Failed to create EC private key." );
     TEST_ASSERT_NOT_EQUAL_MESSAGE( 0, xPrivateKeyHandle, "Invalid object handle returned for EC private key." );
@@ -1355,7 +1346,7 @@ TEST( Full_PKCS11_EC, AFQP_CreateObjectDestroyObject )
                                    ( uint8_t * ) cValidECDSAPrivateKey,
                                    sizeof( cValidECDSAPrivateKey ),
                                    CKK_EC,
-                                   pkcs11configLABEL_DEVICE_PUBLIC_KEY_FOR_TLS,
+                                   ( uint8_t * ) pkcs11configLABEL_DEVICE_PUBLIC_KEY_FOR_TLS,
                                    &xPublicKeyHandle );
     TEST_ASSERT_EQUAL_MESSAGE( CKR_OK, xResult, "Failed to create EC public key." );
     TEST_ASSERT_NOT_EQUAL_MESSAGE( 0, xPrivateKeyHandle, "Invalid object handle returned for EC public key." );
@@ -1363,7 +1354,7 @@ TEST( Full_PKCS11_EC, AFQP_CreateObjectDestroyObject )
     xResult = xProvisionCertificate( xGlobalSession,
                                      ( uint8_t * ) cValidECDSACertificate,
                                      sizeof( cValidECDSACertificate ),
-                                     pkcs11configLABEL_DEVICE_CERTIFICATE_FOR_TLS,
+                                     ( uint8_t * ) pkcs11configLABEL_DEVICE_CERTIFICATE_FOR_TLS,
                                      &xClientCertificateHandle );
     TEST_ASSERT_EQUAL_MESSAGE( CKR_OK, xResult, "Failed to create EC certificate." );
     TEST_ASSERT_NOT_EQUAL_MESSAGE( 0, xClientCertificateHandle, "Invalid object handle returned for EC certificate." );
@@ -1417,9 +1408,6 @@ TEST( Full_PKCS11_EC, AFQP_Sign )
     CK_BYTE xHashedMessage[ SHA256_DIGEST_SIZE ] = { 0xab };
     CK_MECHANISM xMechanism;
     CK_BYTE xSignature[ RSA_SIGNATURE_SIZE ] = { 0 };
-    CK_BYTE xEcPoint[ 256 ] = { 0 };
-    CK_BYTE xEcParams[ 11 ] = { 0 };
-    CK_BYTE xWhatDoesThisBufferDo[ 256 ] = { 0 };
     CK_ULONG xSignatureLength;
 
     prvProvisionEcTestCredentials( &xPrivateKeyHandle, &xCertificateHandle, &xPublicKeyHandle );
@@ -1442,7 +1430,11 @@ TEST( Full_PKCS11_EC, AFQP_Sign )
 
     if( TEST_PROTECT() )
     {
-        lMbedTLSResult = mbedtls_pk_parse_key( &xEcdsaContext, cValidECDSAPrivateKey, sizeof( cValidECDSAPrivateKey ), NULL, 0 );
+        lMbedTLSResult = mbedtls_pk_parse_key( &xEcdsaContext, 
+                                               ( const unsigned char * )cValidECDSAPrivateKey, 
+                                               sizeof( cValidECDSAPrivateKey ), 
+                                               NULL, 
+                                               0 );
         TEST_ASSERT_EQUAL_MESSAGE( 0, lMbedTLSResult, "mbedTLS failed to parse the imported ECDSA private key." );
 
         mbedtls_ecp_keypair * pxEcdsaContext = ( mbedtls_ecp_keypair * ) xEcdsaContext.pk_ctx;
@@ -1482,7 +1474,6 @@ TEST( Full_PKCS11_EC, AFQP_GenerateKeyPair )
     CK_BYTE xEcPoint[ 256 ] = { 0 };
     CK_BYTE xEcParams[ 11 ] = { 0 };
     CK_KEY_TYPE xKeyType;
-    CK_BYTE xWhatDoesThisBufferDo[ 256 ] = { 0 };
     CK_ULONG xSignatureLength;
     CK_ATTRIBUTE xTemplate;
     CK_OBJECT_CLASS xClass;
@@ -1496,8 +1487,8 @@ TEST( Full_PKCS11_EC, AFQP_GenerateKeyPair )
     xCurrentCredentials = eNone;
 
     xResult = xProvisionGenerateKeyPairEC( xGlobalSession,
-                                           pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS,
-                                           pkcs11configLABEL_DEVICE_PUBLIC_KEY_FOR_TLS,
+                                           ( uint8_t * )pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS,
+                                           ( uint8_t * )pkcs11configLABEL_DEVICE_PUBLIC_KEY_FOR_TLS,
                                            &xPrivateKeyHandle,
                                            &xPublicKeyHandle );
 
@@ -1635,7 +1626,11 @@ TEST( Full_PKCS11_EC, AFQP_Verify )
 
     /* Initialize the private key. */
     mbedtls_pk_init( &xPkContext );
-    lMbedResult = mbedtls_pk_parse_key( &xPkContext, cValidECDSAPrivateKey, sizeof( cValidECDSAPrivateKey ), NULL, 0 );
+    lMbedResult = mbedtls_pk_parse_key( &xPkContext, 
+                                        ( const unsigned char * )cValidECDSAPrivateKey, 
+                                        sizeof( cValidECDSAPrivateKey ), 
+                                        NULL, 
+                                        0 );
     TEST_ASSERT_EQUAL_MESSAGE( 0, lMbedResult, "Failed to parse valid ECDSA key." );
     /* Initialize the RNG. */
     mbedtls_entropy_init( &xEntropyContext );
@@ -1704,13 +1699,11 @@ TEST( Full_PKCS11_EC, AFQP_GetAttributeValue )
     CK_BYTE xCertificateValue[ 0x158 ];
     CK_BYTE xEcPoint[ sizeof( xEcPointExpected ) ] = { 0 };
     size_t xLength = sizeof( xCertificateValueExpected );
-    int lConversionReturn;
 
-    lConversionReturn = PKI_ConvertPEMToDER( cValidECDSACertificate,
-                                             sizeof( cValidECDSACertificate ),
-                                             xCertificateValueExpected,
-                                             &xLength );
-
+    PKI_ConvertPEMToDER( ( const unsigned char * )cValidECDSACertificate,
+                         sizeof( cValidECDSACertificate ),
+                         xCertificateValueExpected,
+                         &xLength );
 
     prvProvisionEcTestCredentials( &xPrivateKey, &xCertificate, &xPublicKey );
 
@@ -1853,13 +1846,13 @@ static void prvFindObjectMultiThreadTask( void * pvParameters )
 
         if( xResult != CKR_OK )
         {
-            configPRINTF( ( "FindObject multi-thread task failed to find private key.  Error: %d  Count: %d \r\n", xResult, xCount ) );
+            configPRINTF( ( "FindObject multithreaded task failed to find private key.  Error: %d  Count: %d \r\n", xResult, xCount ) );
             break;
         }
 
         if( ( xHandle == pkcs11INVALID_OBJECT_HANDLE ) )
         {
-            configPRINTF( ( "FindObject multi-thread task failed to find private key.  Invalid object handle returned.  Count: %d \r\n", xCount ) );
+            configPRINTF( ( "FindObject multithreaded task failed to find private key.  Invalid object handle returned.  Count: %d \r\n", xCount ) );
             break;
         }
 
@@ -1867,13 +1860,13 @@ static void prvFindObjectMultiThreadTask( void * pvParameters )
 
         if( xResult != CKR_OK )
         {
-            configPRINTF( ( "FindObject multi-thread task failed to find certificate.  Error: %d  Count: %d \r\n", xResult, xCount ) );
+            configPRINTF( ( "FindObject multithreaded task failed to find certificate.  Error: %d  Count: %d \r\n", xResult, xCount ) );
             break;
         }
 
         if( ( xHandle == pkcs11INVALID_OBJECT_HANDLE ) )
         {
-            configPRINTF( ( "FindObject multi-thread task failed to find certificate.  Invalid object handle returned. Count: %d \r\n", xCount ) );
+            configPRINTF( ( "FindObject multithreaded task failed to find certificate.  Invalid object handle returned. Count: %d \r\n", xCount ) );
             break;
         }
     }
@@ -1961,7 +1954,6 @@ static void prvECGetAttributeValueMultiThreadTask( void * pvParameters )
     CK_OBJECT_HANDLE xCertificate;
     CK_SESSION_HANDLE xSession;
     CK_ATTRIBUTE xTemplate;
-
     CK_BYTE xEcParamsExpected[] = pkcs11DER_ENCODED_OID_P256;
     CK_BYTE xEcParams[ sizeof( xEcParamsExpected ) ];
     CK_BYTE xCertificateValueExpected[ 0x158 ];
@@ -1969,7 +1961,7 @@ static void prvECGetAttributeValueMultiThreadTask( void * pvParameters )
     size_t xLength = sizeof( xCertificateValueExpected );
     int lConversionReturn;
 
-    lConversionReturn = PKI_ConvertPEMToDER( cValidECDSACertificate,
+    lConversionReturn = PKI_ConvertPEMToDER( ( const unsigned char * )cValidECDSACertificate,
                                              sizeof( cValidECDSACertificate ),
                                              xCertificateValueExpected,
                                              &xLength );
@@ -2081,20 +2073,15 @@ static void prvECSignVerifyMultiThreadTask( void * pvParameters )
     MultithreadTaskParams_t * pxMultiTaskParam = pvParameters;
     SignVerifyMultiThread_t * pxSignStruct = pxMultiTaskParam->pvTaskData;
     CK_SESSION_HANDLE xSession = pxSignStruct->xSession;
-    mbedtls_ecp_keypair * pxEcdsaContext = pxSignStruct->pxEcdsaContext;
     CK_OBJECT_HANDLE xPrivateKey = pxSignStruct->xPrivateKey;
     CK_OBJECT_HANDLE xPublicKey = pxSignStruct->xPublicKey;
-
     BaseType_t xCount;
     CK_RV xResult;
-
     /* Note that mbedTLS does not permit a signature on all 0's. */
     CK_BYTE xHashedMessage[ SHA256_DIGEST_SIZE ] = { 0xab };
     CK_MECHANISM xMechanism;
     CK_BYTE xSignature[ 64 ] = { 0 };
-
     CK_ULONG xSignatureLength;
-    int lMbedTLSResult;
 
     for( xCount = 0; xCount < pkcs11testMULTI_THREAD_LOOP_COUNT; xCount++ )
     {
@@ -2105,7 +2092,7 @@ static void prvECSignVerifyMultiThreadTask( void * pvParameters )
 
         if( xResult != CKR_OK )
         {
-            configPRINTF( ( "Sign multithread test failed to SignInit.  Error: %d  Count: %d \r\n", xResult, xCount ) );
+            configPRINTF( ( "Sign multi-threaded test failed to SignInit. Error: %d  Count: %d \r\n", xResult, xCount ) );
             break;
         }
 
@@ -2114,7 +2101,7 @@ static void prvECSignVerifyMultiThreadTask( void * pvParameters )
 
         if( xResult != CKR_OK )
         {
-            configPRINTF( ( "Sign multithread test failed to Sign.  Error: %d  Count: %d \r\n", xResult, xCount ) );
+            configPRINTF( ( "Sign multi-threaded test failed to Sign. Error: %d  Count: %d \r\n", xResult, xCount ) );
             break;
         }
 
@@ -2153,18 +2140,19 @@ TEST( Full_PKCS11_EC, AFQP_SignVerifyMultiThread )
     CK_OBJECT_HANDLE xPrivateKey;
     CK_OBJECT_HANDLE xCertificate;
     CK_OBJECT_HANDLE xPublicKey;
-
-    /* Verify the signature with mbedTLS */
     int lMbedTLSResult;
-
+    mbedtls_ecp_keypair * pxEcdsaContext = NULL;
     mbedtls_pk_context xEcdsaContext;
-
+    
     mbedtls_pk_init( &xEcdsaContext );
-    mbedtls_ecp_keypair * pxEcdsaContext;
 
     if( TEST_PROTECT() )
     {
-        lMbedTLSResult = mbedtls_pk_parse_key( &xEcdsaContext, cValidECDSAPrivateKey, sizeof( cValidECDSAPrivateKey ), NULL, 0 );
+        lMbedTLSResult = mbedtls_pk_parse_key( &xEcdsaContext, 
+                                               ( const unsigned char * )cValidECDSAPrivateKey, 
+                                               sizeof( cValidECDSAPrivateKey ), 
+                                               NULL, 
+                                               0 );
         TEST_ASSERT_EQUAL_MESSAGE( 0, lMbedTLSResult, "mbedTLS failed to parse the imported ECDSA private key." );
 
         pxEcdsaContext = ( mbedtls_ecp_keypair * ) xEcdsaContext.pk_ctx;

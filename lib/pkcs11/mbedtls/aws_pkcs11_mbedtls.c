@@ -71,7 +71,7 @@ typedef int ( * pfnMbedTlsSign )( void * ctx,
                                   int ( *f_rng )( void *, unsigned char *, size_t ),
                                   void * p_rng );
 
-#define PKCS11_PRINT( X )            vLoggingPrintf X
+#define PKCS11_PRINT( X )            vLoggingPrintf X 
 #define PKCS11_WARNING_PRINT( X )    /* vLoggingPrintf X */
 
 #define pkcs11NO_OPERATION            ( ( CK_MECHANISM_TYPE ) 0xFFFFFFFFF )
@@ -251,7 +251,7 @@ CK_RV prvMbedTLS_Initialize( void )
 
     if( xResult == CKR_OK )
     {
-        memset( &xP11Context, 0, sizeof( P11Context_t ) );
+        memset( &xP11Context, 0, sizeof( xP11Context ) );
         xP11Context.xObjectList.xMutex = xSemaphoreCreateMutex();
 
         CRYPTO_Init();
@@ -504,18 +504,28 @@ CK_RV prvAddObjectToList( CK_OBJECT_HANDLE xPalHandle,
 
         if( xResult == CKR_OK )
         {
-            if( 0 == memcmp( xLabel.pValue, pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS, xLabelLength ) )
+            if( 0 == memcmp( xLabel.pValue, 
+                             pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS, 
+                             xLabelLength ) )
             {
-                prvFindObjectInListByLabel( pkcs11configLABEL_DEVICE_PUBLIC_KEY_FOR_TLS, strlen( pkcs11configLABEL_DEVICE_PUBLIC_KEY_FOR_TLS ), &xPalHandle, &xAppHandle2 );
+                prvFindObjectInListByLabel( ( uint8_t * )pkcs11configLABEL_DEVICE_PUBLIC_KEY_FOR_TLS, 
+                                            strlen( pkcs11configLABEL_DEVICE_PUBLIC_KEY_FOR_TLS ), 
+                                            &xPalHandle, 
+                                            &xAppHandle2 );
 
                 if( xPalHandle != CK_INVALID_HANDLE )
                 {
                     xResult = prvDeleteObjectFromList( xAppHandle2 );
                 }
             }
-            else if( 0 == memcmp( xLabel.pValue, pkcs11configLABEL_DEVICE_PUBLIC_KEY_FOR_TLS, xLabelLength ) )
+            else if( 0 == memcmp( xLabel.pValue, 
+                                  pkcs11configLABEL_DEVICE_PUBLIC_KEY_FOR_TLS, 
+                                  xLabelLength ) )
             {
-                prvFindObjectInListByLabel( pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS, strlen( pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS ), &xPalHandle, &xAppHandle2 );
+                prvFindObjectInListByLabel( ( uint8_t * )pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS, 
+                                            strlen( pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS ), 
+                                            &xPalHandle, 
+                                            &xAppHandle2 );
 
                 if( xPalHandle != CK_INVALID_HANDLE )
                 {
@@ -1032,13 +1042,19 @@ CK_RV prvGetExistingKeyComponent( mbedtls_pk_context * pxMbedContext,
     int lMbedResult = 0;
     CK_BBOOL xNeedToFreeMem = CK_FALSE;
 
-    if( 0 == memcmp( pxLabel->pValue, pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS, pxLabel->ulValueLen ) )
+    if( 0 == memcmp( pxLabel->pValue, 
+                     pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS, 
+                     pxLabel->ulValueLen ) )
     {
-        xPalHandle = PKCS11_PAL_FindObject( pkcs11configLABEL_DEVICE_PUBLIC_KEY_FOR_TLS, pxLabel->ulValueLen );
+        xPalHandle = PKCS11_PAL_FindObject( ( uint8_t * )pkcs11configLABEL_DEVICE_PUBLIC_KEY_FOR_TLS, 
+                                            ( uint8_t )pxLabel->ulValueLen );
     }
-    else if( 0 == memcmp( pxLabel->pValue, pkcs11configLABEL_DEVICE_PUBLIC_KEY_FOR_TLS, pxLabel->ulValueLen ) )
+    else if( 0 == memcmp( pxLabel->pValue, 
+                          pkcs11configLABEL_DEVICE_PUBLIC_KEY_FOR_TLS, 
+                          pxLabel->ulValueLen ) )
     {
-        xPalHandle = PKCS11_PAL_FindObject( pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS, pxLabel->ulValueLen );
+        xPalHandle = PKCS11_PAL_FindObject( ( uint8_t * )pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS, 
+                                            ( uint8_t )pxLabel->ulValueLen );
     }
 
     if( xPalHandle != CK_INVALID_HANDLE )
@@ -2048,10 +2064,10 @@ CK_DEFINE_FUNCTION( CK_RV, C_FindObjects )( CK_SESSION_HANDLE xSession,
         /* Check with the PAL if the object was previously stored. */
         if( *pxObject == CK_INVALID_HANDLE )
         {
-            xPalHandle = PKCS11_PAL_FindObject( pxSession->pxFindObjectLabel, strlen( ( const char * ) pxSession->pxFindObjectLabel ) );
+            xPalHandle = PKCS11_PAL_FindObject( pxSession->pxFindObjectLabel, ( uint8_t ) strlen( ( const char * ) pxSession->pxFindObjectLabel ) );
         }
 
-        if( *pxObject != CK_INVALID_HANDLE )
+        if( xPalHandle != CK_INVALID_HANDLE )
         {
             xResult = PKCS11_PAL_GetObjectValue( xPalHandle, &pcObjectValue, &xObjectLength, &xIsPrivate );
 
