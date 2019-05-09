@@ -1969,7 +1969,7 @@ CK_DEFINE_FUNCTION( CK_RV, C_FindObjectsInit )( CK_SESSION_HANDLE xSession,
             }
             else
             {
-                PKCS11_WARNING_PRINT( ( "WARNING: Search parameters other than label are ignored.\r\n" ) );
+                PKCS11_WARNING_PRINT( ( "WARN: Search parameters other than label are ignored.\r\n" ) );
             }
         }
     }
@@ -1997,14 +1997,13 @@ CK_DEFINE_FUNCTION( CK_RV, C_FindObjects )( CK_SESSION_HANDLE xSession,
 {   /*lint !e9072 It's OK to have different parameter name. */
     CK_RV xResult = CKR_OK;
     BaseType_t xDone = pdFALSE;
-    P11SessionPtr_t pxSession = prvSessionPointerFromHandle( xSession );
-
     CK_BYTE_PTR pcObjectValue = NULL;
     uint32_t xObjectLength = 0;
     CK_BBOOL xIsPrivate = CK_TRUE;
     CK_BYTE xByte = 0;
     CK_OBJECT_HANDLE xPalHandle = CK_INVALID_HANDLE;
     uint32_t ulIndex;
+    P11SessionPtr_t pxSession = prvSessionPointerFromHandle( xSession );
 
     /*
      * Check parameters.
@@ -2030,31 +2029,37 @@ CK_DEFINE_FUNCTION( CK_RV, C_FindObjects )( CK_SESSION_HANDLE xSession,
 
     if( 1u != ulMaxObjectCount )
     {
-        PKCS11_WARNING_PRINT( ( "WARN: Searching for more than 1 object not supported. \r\n" ) );
+        PKCS11_WARNING_PRINT( ( "WARN: Searching for more than one object is not supported. \r\n" ) );
     }
 
-    if( ( pdFALSE == xDone ) && ( ( CK_BBOOL ) CK_TRUE == pxSession->xFindObjectComplete ) )
+    if( ( pdFALSE == xDone ) && ( CK_TRUE == pxSession->xFindObjectComplete ) )
     {
         *pulObjectCount = 0;
         xResult = CKR_OK;
         xDone = pdTRUE;
     }
 
-    /* TODO: Re-inspect this previous logic. */
-    if( ( pdFALSE == xDone ) )
+    if( pdFALSE == xDone )
     {
         /* Try to find the object in module's list first. */
-        prvFindObjectInListByLabel( pxSession->pxFindObjectLabel, strlen( ( const char * ) pxSession->pxFindObjectLabel ), &xPalHandle, pxObject );
+        prvFindObjectInListByLabel( pxSession->pxFindObjectLabel, 
+                                    strlen( ( const char * ) pxSession->pxFindObjectLabel ), 
+                                    &xPalHandle, 
+                                    pxObject );
 
         /* Check with the PAL if the object was previously stored. */
         if( *pxObject == CK_INVALID_HANDLE )
         {
-            xPalHandle = PKCS11_PAL_FindObject( pxSession->pxFindObjectLabel, strlen( ( const char * ) pxSession->pxFindObjectLabel ) );
+            xPalHandle = PKCS11_PAL_FindObject( pxSession->pxFindObjectLabel, 
+                                                strlen( ( const char * ) pxSession->pxFindObjectLabel ) );
         }
 
         if( xPalHandle != CK_INVALID_HANDLE )
         {
-            xResult = PKCS11_PAL_GetObjectValue( xPalHandle, &pcObjectValue, &xObjectLength, &xIsPrivate );
+            xResult = PKCS11_PAL_GetObjectValue( xPalHandle, 
+                                                 &pcObjectValue, 
+                                                 &xObjectLength, 
+                                                 &xIsPrivate );
 
             if( xResult == CKR_OK )
             {
@@ -2069,7 +2074,10 @@ CK_DEFINE_FUNCTION( CK_RV, C_FindObjects )( CK_SESSION_HANDLE xSession,
                 }
                 else
                 {
-                    xResult = prvAddObjectToList( xPalHandle, pxObject, pxSession->pxFindObjectLabel, strlen( ( const char * ) pxSession->pxFindObjectLabel ) );
+                    xResult = prvAddObjectToList( xPalHandle, 
+                                                  pxObject, 
+                                                  pxSession->pxFindObjectLabel, 
+                                                  strlen( ( const char * ) pxSession->pxFindObjectLabel ) );
                     *pulObjectCount = 1;
                 }
 
@@ -2078,11 +2086,19 @@ CK_DEFINE_FUNCTION( CK_RV, C_FindObjects )( CK_SESSION_HANDLE xSession,
         }
         else
         {
-            /*xIsObjectWithNoNvmStorage(pxSession->pxFindObjectLabel, strlen(pxSession->pxFindObjectLabel), ) */
-            PKCS11_PRINT( ( "ERROR: Object with label '%s' not found. \r\n", ( char * ) pxSession->pxFindObjectLabel ) );
-            xResult = CKR_FUNCTION_FAILED;
+            PKCS11_WARNING_PRINT( ( "WARN: Object with label '%s' was not found. \r\n", 
+                                    ( char * ) pxSession->pxFindObjectLabel ) );
+            *pulObjectCount = 0;
+            xResult = CKR_OK;
+            *pxObject = CK_INVALID_HANDLE;
         }
     }
+
+    /* This port only supports searching by the label attribute and each object
+    must have a unique label. Note, other ports are free to implement more 
+    complex Find capabilities, as long as they're consistent with the PKCS #11
+    standard. */
+    pxSession->xFindObjectComplete = CK_TRUE;
 
     return xResult;
 }
