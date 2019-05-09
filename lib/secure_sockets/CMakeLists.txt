@@ -1,4 +1,4 @@
-afr_module(secure_sockets)
+afr_module()
 
 afr_module_sources(
     secure_sockets
@@ -20,7 +20,7 @@ afr_module_dependencies(
 )
 
 # Link to this INTERFACE target to use the default implementation based on FreeRTOS-Plus-TCP.
-afr_module(secure_sockets_freertos_tcp INTERFACE)
+afr_module(NAME secure_sockets_freertos_tcp INTERFACE)
 afr_module_sources(
     secure_sockets_freertos_tcp INTERFACE
     "${AFR_MODULES_DIR}/portable/freertos_plus_tcp/aws_secure_sockets.c"

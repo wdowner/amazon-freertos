@@ -17,7 +17,7 @@ target_include_directories(
 afr_glob_src(mbedtls_src DIRECTORY "${AFR_3RDPARTY_DIR}/mbedtls" RECURSE)
 # Build to static library to save some time.
 add_library(
-    afr_3rdparty_mbedtls STATIC
+    afr_3rdparty_mbedtls STATIC EXCLUDE_FROM_ALL
     ${mbedtls_src}
 )
 target_include_directories(
@@ -46,17 +46,37 @@ target_include_directories(
 )
 
 # tinycbor - CBOR implementation
-afr_3rdparty_module(tinycbor)
-afr_glob_files(tinycbor_src DIRECTORY "${AFR_3RDPARTY_DIR}/tinycbor" RECURSE)
-target_sources(
-    3rdparty::tinycbor INTERFACE
+set(tinycbor_src
+    "${AFR_3RDPARTY_DIR}/tinycbor/cborencoder.c"
+    "${AFR_3RDPARTY_DIR}/tinycbor/cborencoder_close_container_checked.c"
+    "${AFR_3RDPARTY_DIR}/tinycbor/cborerrorstrings.c"
+    "${AFR_3RDPARTY_DIR}/tinycbor/cborparser.c"
+    "${AFR_3RDPARTY_DIR}/tinycbor/cborparser_dup_string.c"
+)
+add_library(
+    afr_3rdparty_tinycbor STATIC EXCLUDE_FROM_ALL
     ${tinycbor_src}
-    "${AFR_3RDPARTY_DIR}/tinycbor/LICENSE"
+)
+target_sources(
+    afr_3rdparty_tinycbor
+    PRIVATE
+        ${tinycbor_src}
 )
 target_include_directories(
-    3rdparty::tinycbor INTERFACE
-    "${AFR_3RDPARTY_DIR}/tinycbor"
+    afr_3rdparty_tinycbor
+    PUBLIC
+        "${AFR_3RDPARTY_DIR}/tinycbor"
 )
+target_link_libraries(
+    afr_3rdparty_tinycbor
+    PRIVATE AFR::compiler::mcu_port
+)
+target_compile_options(
+    afr_3rdparty_tinycbor
+    PRIVATE
+        $<$<C_COMPILER_ID:GNU>:-w>
+)
+add_library(3rdparty::tinycbor ALIAS afr_3rdparty_tinycbor)
 
 # tracealyzer - Trace record library from FreeRTOS
 afr_3rdparty_module(tracealyzer)

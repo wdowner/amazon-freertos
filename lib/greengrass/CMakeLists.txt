@@ -1,4 +1,4 @@
-afr_module(greengrass)
+afr_module()
 
 afr_module_sources(
     greengrass

@@ -1,4 +1,4 @@
-afr_module(utils INTERFACE)
+afr_module(INTERFACE)
 
 afr_module_sources(
     utils

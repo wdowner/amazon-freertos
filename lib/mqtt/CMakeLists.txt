@@ -1,4 +1,4 @@
-afr_module(mqtt)
+afr_module()
 
 afr_module_sources(
     mqtt

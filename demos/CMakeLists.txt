@@ -2,7 +2,7 @@
 # Demos
 # -------------------------------------------------------------------------------------------------
 # Key provisioning
-afr_demo_module(demo_key_provisioning)
+afr_demo_module(key_provisioning)
 afr_module_sources(
     demo_key_provisioning
     INTERFACE
@@ -17,7 +17,7 @@ afr_module_dependencies(
 )
 
 # Logging
-afr_demo_module(demo_logging)
+afr_demo_module(logging)
 afr_module_sources(
     demo_logging
     INTERFACE
@@ -26,7 +26,7 @@ afr_module_sources(
 )
 
 # MQTT hello world demo
-afr_demo_module(demo_mqtt_hello_world)
+afr_demo_module(mqtt_hello_world)
 afr_module_sources(
     demo_mqtt_hello_world
     INTERFACE
@@ -40,7 +40,7 @@ afr_module_dependencies(
 )
 
 # MQTT publish subscribe demo
-afr_demo_module(demo_mqtt_pubsub)
+afr_demo_module(mqtt_pubsub)
 afr_module_sources(
     demo_mqtt_pubsub
     INTERFACE
@@ -55,7 +55,7 @@ afr_module_dependencies(
 
 # TCP echo demo
 # TODO, tcp echo client separate tasks is not supported in NXP
-afr_demo_module(demo_tcp)
+afr_demo_module(tcp)
 afr_module_sources(
     demo_tcp
     INTERFACE
@@ -70,7 +70,7 @@ afr_module_dependencies(
 )
 
 # Shadow demo
-afr_demo_module(demo_shadow)
+afr_demo_module(shadow)
 afr_module_sources(
     demo_shadow
     INTERFACE
@@ -85,7 +85,7 @@ afr_module_dependencies(
 )
 
 # Greengrass demo
-afr_demo_module(demo_greengrass)
+afr_demo_module(greengrass)
 afr_module_sources(
     demo_greengrass
     INTERFACE
@@ -99,7 +99,7 @@ afr_module_dependencies(
 )
 
 # OTA demo
-afr_demo_module(demo_ota)
+afr_demo_module(ota)
 afr_module_sources(
     demo_ota
     INTERFACE
@@ -113,7 +113,7 @@ afr_module_dependencies(
 )
 
 # Base demo target
-afr_demo_module(demo_base)
+afr_demo_module(base)
 afr_module_sources(
     demo_base
     INTERFACE

@@ -1,4 +1,4 @@
-afr_module(bufferpool INTERNAL)
+afr_module(INTERNAL)
 
 afr_module_sources(
     bufferpool

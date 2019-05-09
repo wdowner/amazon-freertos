@@ -1,4 +1,4 @@
-afr_module(tls OPTIONAL)
+afr_module(INTERNAL)
 
 afr_module_sources(
     tls

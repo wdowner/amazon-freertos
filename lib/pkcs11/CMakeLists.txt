@@ -1,4 +1,4 @@
-afr_module(pkcs11)
+afr_module()
 
 afr_module_sources(
     pkcs11
@@ -22,7 +22,7 @@ afr_module_dependencies(
 
 
 # Link to this INTERFACE target to use the default implementation based on mbedtls.
-afr_module(pkcs11_mbedtls INTERFACE)
+afr_module(NAME pkcs11_mbedtls INTERFACE)
 afr_module_sources(
     pkcs11_mbedtls INTERFACE
     "${AFR_MODULES_DIR}/pkcs11/mbedtls/aws_pkcs11_mbedtls.c"

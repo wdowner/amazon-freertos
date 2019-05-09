@@ -1,4 +1,4 @@
-afr_module(shadow)
+afr_module()
 
 afr_module_sources(
     shadow

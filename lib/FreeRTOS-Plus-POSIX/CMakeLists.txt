@@ -1,4 +1,4 @@
-afr_module(posix KERNEL)
+afr_module(NAME posix KERNEL)
 
 afr_glob_src(posix_std_headers DIRECTORY "${AFR_MODULES_DIR}/include/FreeRTOS_POSIX" RECURSE)
 afr_module_sources(
@@ -28,7 +28,7 @@ afr_module_dependencies(
 )
 
 # Link to this INTERFACE target to use the default implementation based on FreeRTOS.
-afr_module(freertos_plus_posix INTERFACE OPTIONAL)
+afr_module(NAME freertos_plus_posix INTERFACE INTERNAL)
 
 afr_module_sources(
     freertos_plus_posix

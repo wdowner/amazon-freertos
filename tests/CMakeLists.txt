@@ -2,7 +2,7 @@
 # Tests
 # -------------------------------------------------------------------------------------------------
 # POSIX test
-afr_test_module(test_posix)
+afr_test_module(posix)
 afr_module_sources(
     test_posix
     INTERFACE
@@ -20,7 +20,7 @@ afr_module_dependencies(
 )
 
 # Crypto test
-afr_test_module(test_crypto)
+afr_test_module(crypto)
 afr_module_sources(
     test_crypto
     INTERFACE
@@ -32,7 +32,7 @@ afr_module_dependencies(
 )
 
 # Greengrass test
-afr_test_module(test_greengrass)
+afr_test_module(greengrass)
 afr_module_sources(
     test_greengrass
     INTERFACE
@@ -47,7 +47,7 @@ afr_module_dependencies(
 )
 
 # MQTT test
-afr_test_module(test_mqtt)
+afr_test_module(mqtt)
 afr_module_sources(
     test_mqtt
     INTERFACE
@@ -60,7 +60,7 @@ afr_module_dependencies(
 )
 
 # OTA test
-afr_test_module(test_ota)
+afr_test_module(ota)
 afr_module_sources(
     test_ota
     INTERFACE
@@ -77,7 +77,7 @@ afr_module_dependencies(
 )
 
 # PKCS11 test
-afr_test_module(test_pkcs11)
+afr_test_module(pkcs11)
 afr_module_sources(
     test_pkcs11
     INTERFACE
@@ -91,7 +91,7 @@ afr_module_dependencies(
 )
 
 # Secure sockets test
-afr_test_module(test_secure_sockets)
+afr_test_module(secure_sockets)
 afr_module_sources(
     test_secure_sockets
     INTERFACE
@@ -104,7 +104,7 @@ afr_module_dependencies(
 )
 
 # TLS test
-afr_test_module(test_tls)
+afr_test_module(tls)
 afr_module_sources(
     test_tls
     INTERFACE
@@ -117,7 +117,7 @@ afr_module_dependencies(
 )
 
 # Shadow test
-afr_test_module(test_shadow)
+afr_test_module(shadow)
 afr_module_sources(
     test_shadow
     INTERFACE
@@ -130,7 +130,7 @@ afr_module_dependencies(
 )
 
 # WiFi test
-afr_test_module(test_wifi)
+afr_test_module(wifi)
 afr_module_sources(
     test_wifi
     INTERFACE
@@ -143,7 +143,7 @@ afr_module_dependencies(
 )
 
 # Memory test
-afr_test_module(test_memory)
+afr_test_module(memory)
 afr_module_sources(
     test_memory
     INTERFACE
@@ -151,7 +151,7 @@ afr_module_sources(
 )
 
 # Base tests target
-afr_test_module(test_base)
+afr_test_module(base)
 afr_module_sources(
     test_base
     INTERFACE

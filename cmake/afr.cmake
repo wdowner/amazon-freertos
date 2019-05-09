@@ -16,7 +16,7 @@ set(AFR_TESTS_DIR "${AFR_ROOT_DIR}/tests/common" CACHE INTERNAL "Amazon FreeRTOS
 set(AFR_3RDPARTY_DIR "${AFR_MODULES_DIR}/third_party" CACHE INTERNAL "3rdparty libraries root.")
 
 # Set regular version and Git commit version.
-set(AFR_VERSION "v${PROJECT_VERSION}")
+set(AFR_VERSION "${PROJECT_VERSION}")
 set(AFR_VERSION_VCS "Unknown" CACHE INTERNAL "")
 # Check if we're in a Git repository.
 find_package(Git)
@@ -45,6 +45,7 @@ set(AFR_TOOLCHAIN ${__toolchain} CACHE INTERNAL "Toolchain to build Amazon FreeR
 option(AFR_ENABLE_TESTS "Build tests for Amazon FreeRTOS. Requires recompiling whole library." OFF)
 if(AFR_ENABLE_TESTS)
     add_compile_definitions(AMAZON_FREERTOS_ENABLE_UNIT_TESTS)
+    add_compile_definitions(IOT_BUILD_TESTS=1)
     set(AFR_IS_TESTING 1 CACHE INTERNAL "")
 else()
     set(AFR_IS_TESTING 0 CACHE INTERNAL "")
@@ -53,6 +54,11 @@ endif()
 # Enable debug mode for CMake files
 option(AFR_DEBUG_CMAKE "Turn on additional checks and messages.")
 mark_as_advanced(AFR_DEBUG_CMAKE)
+
+# Enable metadata mode. This is for internal use only to generate metadata information for a board.
+if(NOT CACHE{AFR_METADATA_MODE})
+    set(AFR_METADATA_MODE 0 CACHE INTERNAL "Turn off build and generate metadata information.")
+endif()
 
 # Import other CMake files.
 include("${CMAKE_CURRENT_LIST_DIR}/afr_utils.cmake")

@@ -1,5 +1,5 @@
 # Common files.
-afr_module(common INTERFACE)
+afr_module(NAME common INTERFACE)
 afr_module_sources(
     common
     INTERFACE
@@ -7,7 +7,7 @@ afr_module_sources(
 )
 
 # FreeRTOS module.
-afr_module(freertos INTERFACE KERNEL)
+afr_module(NAME freertos INTERFACE KERNEL)
 afr_module_sources(
     freertos
     INTERFACE
@@ -40,7 +40,7 @@ afr_module_include_dirs(
 )
 
 # Kernel module.
-afr_module(kernel INTERNAL KERNEL)
+afr_module(NAME kernel INTERNAL KERNEL)
 
 afr_module_dependencies(
     kernel

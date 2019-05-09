@@ -1,4 +1,4 @@
-afr_module(crypto OPTIONAL)
+afr_module(INTERNAL)
 
 afr_module_sources(
     crypto

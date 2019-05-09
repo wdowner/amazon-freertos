@@ -1,4 +1,4 @@
-afr_module(freertos_plus_tcp OPTIONAL)
+afr_module(NAME freertos_plus_tcp INTERNAL)
 
 afr_module_sources(
     freertos_plus_tcp
