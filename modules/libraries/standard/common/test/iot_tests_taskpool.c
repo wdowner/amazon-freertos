@@ -61,11 +61,6 @@ typedef struct JobUserContext
 } JobUserContext_t;
 
 /**
- * @brief The initializer for the user context.
- */
-#define IOT_TASKPOOL_TEST_JOB_CONTEXT_INITIALIZER { .counter = 0 };
-
-/**
  * @brief A simple user context to prove the taskpool grows as expected.
  */
 typedef struct JobBlockingUserContext
@@ -713,7 +708,9 @@ TEST( Common_Unit_Task_Pool, ScheduleTasks_LongRunningAndCachedJobsAndDestroy )
     IotTaskPoolJobStorage_t tpDeferredJobsStorage[ TEST_TASKPOOL_LONG_JOBS_NUMBER ];
     IotTaskPoolJob_t tpDeferredJobs[ TEST_TASKPOOL_LONG_JOBS_NUMBER ];
 
-    JobUserContext_t userContext = IOT_TASKPOOL_TEST_JOB_CONTEXT_INITIALIZER;
+    JobUserContext_t userContext;
+
+    memset( &userContext, 0, sizeof( JobUserContext_t ) );
 
     /* Initialize user context. */
     TEST_ASSERT( IotMutex_Create( &userContext.lock, false ) );
@@ -970,8 +967,9 @@ TEST( Common_Unit_Task_Pool, ScheduleTasks_ScheduleOneThenWait )
     IotTaskPool_t taskPool = IOT_TASKPOOL_INITIALIZER;
     const IotTaskPoolInfo_t tpInfo = { .minThreads = 2, .maxThreads = 3, .stackSize = IOT_THREAD_DEFAULT_STACK_SIZE, .priority = IOT_THREAD_DEFAULT_PRIORITY };
 
-    JobUserContext_t userContext = IOT_TASKPOOL_TEST_JOB_CONTEXT_INITIALIZER;
+    JobUserContext_t userContext;
 
+    memset( &userContext, 0, sizeof( JobUserContext_t ) );
     /* Initialize user context. */
     TEST_ASSERT_TRUE( IotMutex_Create( &userContext.lock, false ) );
 
@@ -1058,7 +1056,9 @@ TEST( Common_Unit_Task_Pool, ScheduleTasks_ScheduleOneDeferredThenWait )
     IotTaskPool_t taskPool = IOT_TASKPOOL_INITIALIZER;
     const IotTaskPoolInfo_t tpInfo = { .minThreads = 2, .maxThreads = 3, .stackSize = IOT_THREAD_DEFAULT_STACK_SIZE, .priority = IOT_THREAD_DEFAULT_PRIORITY };
 
-    JobUserContext_t userContext = IOT_TASKPOOL_TEST_JOB_CONTEXT_INITIALIZER;
+    JobUserContext_t userContext;
+
+    memset( &userContext, 0, sizeof( JobUserContext_t ) );
 
     /* Initialize user context. */
     TEST_ASSERT( IotMutex_Create( &userContext.lock, false ) );
@@ -1146,7 +1146,9 @@ TEST( Common_Unit_Task_Pool, ScheduleTasks_ScheduleOneRecyclableThenWait )
     IotTaskPool_t taskPool = IOT_TASKPOOL_INITIALIZER;
     const IotTaskPoolInfo_t tpInfo = { .minThreads = 2, .maxThreads = 3, .stackSize = IOT_THREAD_DEFAULT_STACK_SIZE, .priority = IOT_THREAD_DEFAULT_PRIORITY };
 
-    JobUserContext_t userContext = IOT_TASKPOOL_TEST_JOB_CONTEXT_INITIALIZER;
+    JobUserContext_t userContext;
+
+    memset( &userContext, 0, sizeof( JobUserContext_t ) );
 
     /* Initialize user context. */
     TEST_ASSERT( IotMutex_Create( &userContext.lock, false ) );
@@ -1229,7 +1231,9 @@ TEST( Common_Unit_Task_Pool, ScheduleTasks_ScheduleAllThenWait )
     IotTaskPool_t taskPool = IOT_TASKPOOL_INITIALIZER;
     const IotTaskPoolInfo_t tpInfo = { .minThreads = 2, .maxThreads = 3, .stackSize = IOT_THREAD_DEFAULT_STACK_SIZE, .priority = IOT_THREAD_DEFAULT_PRIORITY };
 
-    JobUserContext_t userContext = IOT_TASKPOOL_TEST_JOB_CONTEXT_INITIALIZER;
+    JobUserContext_t userContext;
+
+    memset( &userContext, 0, sizeof( JobUserContext_t ) );
 
     /* Initialize user context. */
     TEST_ASSERT( IotMutex_Create( &userContext.lock, false ) );
@@ -1304,7 +1308,9 @@ TEST( Common_Unit_Task_Pool, ScheduleTasks_ScheduleAllRecyclableThenWait )
     IotTaskPool_t taskPool = IOT_TASKPOOL_INITIALIZER;
     const IotTaskPoolInfo_t tpInfo = { .minThreads = 2, .maxThreads = 3, .stackSize = IOT_THREAD_DEFAULT_STACK_SIZE, .priority = IOT_THREAD_DEFAULT_PRIORITY };
 
-    JobUserContext_t userContext = IOT_TASKPOOL_TEST_JOB_CONTEXT_INITIALIZER;
+    JobUserContext_t userContext;
+
+    memset( &userContext, 0, sizeof( JobUserContext_t ) );
 
     /* Initialize user context. */
     TEST_ASSERT( IotMutex_Create( &userContext.lock, false ) );
@@ -1387,7 +1393,9 @@ TEST( Common_Unit_Task_Pool, ScheduleTasks_ScheduleAllDeferredRecyclableThenWait
     IotTaskPool_t taskPool = IOT_TASKPOOL_INITIALIZER;
     const IotTaskPoolInfo_t tpInfo = { .minThreads = 2, .maxThreads = 3, .stackSize = IOT_THREAD_DEFAULT_STACK_SIZE, .priority = IOT_THREAD_DEFAULT_PRIORITY };
 
-    JobUserContext_t userContext = IOT_TASKPOOL_TEST_JOB_CONTEXT_INITIALIZER;
+    JobUserContext_t userContext;
+
+    memset( &userContext, 0, sizeof( JobUserContext_t ) );
 
     /* Initialize user context. */
     TEST_ASSERT( IotMutex_Create( &userContext.lock, false ) );
@@ -1470,7 +1478,9 @@ TEST( Common_Unit_Task_Pool, ScheduleTasks_ReSchedule )
     IotTaskPool_t taskPool = IOT_TASKPOOL_INITIALIZER;
     const IotTaskPoolInfo_t tpInfo = { .minThreads = 2, .maxThreads = 3, .stackSize = IOT_THREAD_DEFAULT_STACK_SIZE, .priority = IOT_THREAD_DEFAULT_PRIORITY };
 
-    JobUserContext_t userContext = IOT_TASKPOOL_TEST_JOB_CONTEXT_INITIALIZER;
+    JobUserContext_t userContext;
+
+    memset( &userContext, 0, sizeof( JobUserContext_t ) );
 
     /* Initialize user context. */
     TEST_ASSERT( IotMutex_Create( &userContext.lock, false ) );
@@ -1597,7 +1607,9 @@ TEST( Common_Unit_Task_Pool, ScheduleTasks_ReScheduleDeferred )
     IotTaskPool_t taskPool = IOT_TASKPOOL_INITIALIZER;
     const IotTaskPoolInfo_t tpInfo = { .minThreads = 2, .maxThreads = 3, .stackSize = IOT_THREAD_DEFAULT_STACK_SIZE, .priority = IOT_THREAD_DEFAULT_PRIORITY };
 
-    JobUserContext_t userContext = IOT_TASKPOOL_TEST_JOB_CONTEXT_INITIALIZER;
+    JobUserContext_t userContext;
+
+    memset( &userContext, 0, sizeof( JobUserContext_t ) );
 
     /* Initialize user context. */
     TEST_ASSERT( IotMutex_Create( &userContext.lock, false ) );
@@ -1715,7 +1727,9 @@ TEST( Common_Unit_Task_Pool, ScheduleTasks_CancelTasks )
     uint32_t canceled = 0;
     uint32_t scheduled = 0;
 
-    JobUserContext_t userContext = IOT_TASKPOOL_TEST_JOB_CONTEXT_INITIALIZER;
+    JobUserContext_t userContext;
+
+    memset( &userContext, 0, sizeof( JobUserContext_t ) );
 
     /* In static memory mode, only the recyclable job limit may be allocated. */
     #if IOT_STATIC_MEMORY_ONLY == 1
